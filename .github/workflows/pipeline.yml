@@ -8,7 +8,6 @@ on:
     branches: [master]
     types: [opened, synchronize]
 
-
 jobs:
   simple_deployment_pipeline:
     runs-on: ubuntu-18.04
@@ -61,21 +60,19 @@ jobs:
           DEFAULT_BUMP: patch
 
       - name: New deploy
-        if: github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip')
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
           fields: repo,message # selectable (default: repo,message)
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
-        if: success()
+        if: github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') && success()
 
       - name: Fail deploy
-        if: github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip')
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
           fields: repo,message,commit,author,action,eventName,ref,workflow,job,took # selectable (default: repo,message)
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
-        if: failure()
+        if: github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') && failure()
